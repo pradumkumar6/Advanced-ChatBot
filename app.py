@@ -1,39 +1,25 @@
 import streamlit as st
-from backend import generate_reply, get_history
-import os
-from dotenv import load_dotenv
+from backend import generate_reply
 
-load_dotenv()
+st.set_page_config(page_title="Euriai ChatBot", page_icon="🤖")
+st.title("🧠 Euriai Chatbot with Memory")
 
-st.set_page_config(page_title="Euriai Chatbot", page_icon="🤖", layout="centered")
+# Session ID input
+session_id = st.text_input("Enter your session ID (e.g. user123):", value="", max_chars=50)
 
-st.markdown("""
-    <style>
-        body { background-color: #0E1117; color: #FAFAFA; }
-        .stButton>button {
-            background-color: #1f77b4;
-            color: white;
-        }
-    </style>
-""", unsafe_allow_html=True)
+# Get user message
+user_input = st.chat_input("Type your message…")
 
-st.title("🤖 Euriai AI Chatbot")
-session_id = st.text_input("Session ID", value="default_session")
-
-if "messages" not in st.session_state:
-    st.session_state.messages = get_history(session_id)
-
-for msg, reply in st.session_state.messages:
+# Display new message and response only (not all history)
+if user_input and session_id:
     with st.chat_message("user"):
-        st.markdown(msg)
-    with st.chat_message("ai"):
-        st.markdown(reply)
+        st.write(user_input)
 
-user_input = st.chat_input("Say something...")
-if user_input:
-    with st.chat_message("user"):
-        st.markdown(user_input)
     reply = generate_reply(session_id, user_input)
-    with st.chat_message("ai"):
-        st.markdown(reply)
-    st.session_state.messages.append((user_input, reply))
+
+    with st.chat_message("assistant"):
+        st.write(reply)
+
+# Optional: Show a friendly note if session is not set
+elif not session_id:
+    st.info("Please enter a session ID to start chatting.")
